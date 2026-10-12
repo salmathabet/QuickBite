@@ -7,13 +7,18 @@ import RecipeDetails from "./components/RecipeDetails.jsx";
 import FavoritesPage from "./components/Favoritespage.jsx";
 import { findRecipesByIngredients } from "./api/mealApi.js";
 import { useFavorites } from "./useFavorites.js";
+import { useAuth } from "./context/AuthContext";
+import AuthForm from "./components/AuthForm.jsx";
+import About from "./pages/About.jsx";
+import Contact from "./pages/Contact.jsx";
 
 function App() {
+  const { user, loading } = useAuth();
   const [recipes, setRecipes] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchedCount, setSearchedCount] = useState(0);
   const [selectedMealId, setSelectedMealId] = useState(null);
-  const [page, setPage] = useState("home"); // "home" | "favorites"
+  const [page, setPage] = useState("home"); // "home" | "favorites" | "about" | "contact"
 
   const { favorites, isFavorite, toggleFavorite } = useFavorites();
 
@@ -26,9 +31,13 @@ function App() {
   };
 
   const handleNavigate = (target) => {
-    setSelectedMealId(null); // لو كان فاتح تفاصيل وصفة، اقفلها لما ينقل صفحة
+    setSelectedMealId(null);
     setPage(target);
+    window.scrollTo(0, 0);
   };
+
+  if (loading) return <p className="text-center mt-16">...</p>;
+  if (!user) return <AuthForm />;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -50,6 +59,10 @@ function App() {
             onToggleFavorite={toggleFavorite}
             onSelectMeal={setSelectedMealId}
           />
+        ) : page === "about" ? (
+          <About />
+        ) : page === "contact" ? (
+          <Contact />
         ) : (
           <>
             <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">
@@ -80,7 +93,7 @@ function App() {
         )}
       </main>
 
-      <Footer />
+      <Footer onNavigate={handleNavigate} />
     </div>
   );
 }
